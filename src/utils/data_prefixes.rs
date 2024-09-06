@@ -66,6 +66,17 @@ pub fn get_decimal_bytes(bytes: u64) -> (f64, &'static str) {
     }
 }
 
+#[inline]
+pub fn get_binary_pps(pps: u64) -> (f64, &'static str) {
+    match pps {
+        b if b < KILO_LIMIT => (pps as f64, "pps"),
+        b if b < MEGA_LIMIT => (pps as f64 / KILO_LIMIT_F64, "Kpps"),
+        b if b < GIGA_LIMIT => (pps as f64 / MEGA_LIMIT_F64, "Mpps"),
+        b if b < TERA_LIMIT => (pps as f64 / GIGA_LIMIT_F64, "Gpps"),
+        _ => (pps as f64 / TERA_LIMIT_F64, "Tpps"),
+    }
+}
+
 /// Returns a tuple containing the value and the unit.  In units of 1024.
 /// This only supports up to a tebi.  Note the "single" unit will have a space
 /// appended to match the others if `spacing` is true.

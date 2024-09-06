@@ -147,6 +147,8 @@ pub struct DataCollector {
     last_collection_time: Instant,
     total_rx: u64,
     total_tx: u64,
+    total_rx_pkts: u64,
+    total_tx_pkts: u64,
     show_average_cpu: bool,
     widgets_to_harvest: UsedWidgets,
     filters: DataFilters,
@@ -193,6 +195,8 @@ impl DataCollector {
             last_collection_time,
             total_rx: 0,
             total_tx: 0,
+            total_rx_pkts: 0,
+            total_tx_pkts: 0,
             show_average_cpu: false,
             widgets_to_harvest: UsedWidgets::default(),
             #[cfg(feature = "battery")]
@@ -446,12 +450,16 @@ impl DataCollector {
                 self.last_collection_time,
                 &mut self.total_rx,
                 &mut self.total_tx,
+                &mut self.total_rx_pkts,
+                &mut self.total_tx_pkts,
                 current_instant,
                 &self.filters.net_filter,
             );
 
             self.total_rx = net_data.total_rx;
             self.total_tx = net_data.total_tx;
+            self.total_rx_pkts = net_data.total_rx_pkts;
+            self.total_tx_pkts = net_data.total_tx_pkts;
             self.data.network = Some(net_data);
         }
     }

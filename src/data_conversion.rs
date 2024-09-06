@@ -40,6 +40,10 @@ pub struct ConvertedNetworkData {
     pub tx_display: String,
     pub total_rx_display: Option<String>,
     pub total_tx_display: Option<String>,
+    pub rx_display_pkts: String,
+    pub tx_display_pkts: String,
+    pub total_rx_display_pkts: Option<String>,
+    pub total_tx_display_pkts: Option<String>,
     // TODO: [NETWORKING] add min/max/mean of each
     // min_rx : f64,
     // max_rx : f64,
@@ -68,6 +72,10 @@ pub struct ConvertedData {
     pub total_tx_display: String,
     pub network_data_rx: Vec<Point>,
     pub network_data_tx: Vec<Point>,
+    pub rx_display_pkts: String,
+    pub tx_display_pkts: String,
+    pub total_rx_display_pkts: String,
+    pub total_tx_display_pkts: String,
 
     pub mem_labels: Option<(String, String)>,
     #[cfg(not(target_os = "windows"))]
@@ -373,7 +381,7 @@ pub fn convert_network_points(
         ),
     };
 
-    let (rx_converted_result, total_rx_converted_result): ((f64, String), (f64, &'static str)) =
+    let (rx_converted_result, _total_rx_converted_result): ((f64, String), (f64, &'static str)) =
         if use_binary_prefix {
             (
                 get_binary_prefix(rx_data, unit), /* If this isn't obvious why there's two
@@ -388,7 +396,7 @@ pub fn convert_network_points(
             )
         };
 
-    let (tx_converted_result, total_tx_converted_result): ((f64, String), (f64, &'static str)) =
+    let (tx_converted_result, _total_tx_converted_result): ((f64, String), (f64, &'static str)) =
         if use_binary_prefix {
             (
                 get_binary_prefix(tx_data, unit),
@@ -401,17 +409,31 @@ pub fn convert_network_points(
             )
         };
 
+    let (rx_converted_result_pkts, total_rx_converted_result): ((f64, &'static str), (f64, &'static str)) =
+        (
+            get_binary_pps(data.network_harvest.rx_pkts),
+            get_binary_pps(data.network_harvest.total_rx_pkts),
+        );
+
+    let (tx_converted_result_pkts, total_tx_converted_result): ((f64, &'static str), (f64, &'static str)) =
+        (
+            get_binary_pps(data.network_harvest.tx_pkts),
+            get_binary_pps(data.network_harvest.total_tx_pkts),
+        );
+
     if need_four_points {
         let rx_display = format!("{:.*}{}", 1, rx_converted_result.0, rx_converted_result.1);
         let total_rx_display = Some(format!(
             "{:.*}{}",
             1, total_rx_converted_result.0, total_rx_converted_result.1
         ));
-        let tx_display = format!("{:.*}{}", 1, tx_converted_result.0, tx_converted_result.1);
+        let tx_display = format!("{:.*}{}", 1, rx_converted_result.0, rx_converted_result.1);
         let total_tx_display = Some(format!(
             "{:.*}{}",
             1, total_tx_converted_result.0, total_tx_converted_result.1
         ));
+        let rx_display_pkts = format!("{:.*}{}", 1, rx_converted_result_pkts.0, rx_converted_result_pkts.1);
+        let tx_display_pkts = format!("{:.*}{}", 1, tx_converted_result_pkts.0, tx_converted_result_pkts.1);
         ConvertedNetworkData {
             rx,
             tx,
@@ -419,15 +441,20 @@ pub fn convert_network_points(
             tx_display,
             total_rx_display,
             total_tx_display,
+            rx_display_pkts,
+            tx_display_pkts,
+            total_rx_display_pkts: None,
+            total_tx_display_pkts: None,
         }
     } else {
         let rx_display = format!(
-            "RX: {:<10}  All: {}",
+            "RX: {:<10} RX: {:<10} All: {}",
             if use_binary_prefix {
                 format!("{:.1}{:3}", rx_converted_result.0, rx_converted_result.1)
             } else {
                 format!("{:.1}{:2}", rx_converted_result.0, rx_converted_result.1)
             },
+            format!("{:.1}{:4}", rx_converted_result_pkts.0, rx_converted_result_pkts.1),
             if use_binary_prefix {
                 format!(
                     "{:.1}{:3}",
@@ -441,12 +468,13 @@ pub fn convert_network_points(
             }
         );
         let tx_display = format!(
-            "TX: {:<10}  All: {}",
+            "TX: {:<10} TX: {:<10} All: {}",
             if use_binary_prefix {
                 format!("{:.1}{:3}", tx_converted_result.0, tx_converted_result.1)
             } else {
                 format!("{:.1}{:2}", tx_converted_result.0, tx_converted_result.1)
             },
+            format!("{:.1}{:4}", tx_converted_result_pkts.0, tx_converted_result_pkts.1),
             if use_binary_prefix {
                 format!(
                     "{:.1}{:3}",
@@ -457,8 +485,11 @@ pub fn convert_network_points(
                     "{:.1}{:2}",
                     total_tx_converted_result.0, total_tx_converted_result.1
                 )
-            }
+            },
+
         );
+        let rx_display_pkts = format!("RX PPS: {:<10} All: {}", data.network_harvest.rx_pkts, data.network_harvest.total_rx_pkts);
+        let tx_display_pkts = format!("TX PPS: {:<10} All: {}", data.network_harvest.tx_pkts, data.network_harvest.total_tx_pkts);
 
         ConvertedNetworkData {
             rx,
@@ -467,6 +498,10 @@ pub fn convert_network_points(
             tx_display,
             total_rx_display: None,
             total_tx_display: None,
+            rx_display_pkts,
+            tx_display_pkts,
+            total_rx_display_pkts: None,
+            total_tx_display_pkts: None,
         }
     }
 }

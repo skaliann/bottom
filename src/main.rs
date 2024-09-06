@@ -463,6 +463,8 @@ fn main() -> anyhow::Result<()> {
                             app.converted_data.network_data_tx = network_data.tx;
                             app.converted_data.rx_display = network_data.rx_display;
                             app.converted_data.tx_display = network_data.tx_display;
+                            app.converted_data.rx_display_pkts = network_data.rx_display_pkts;
+                            app.converted_data.tx_display_pkts = network_data.tx_display_pkts;
                             if let Some(total_rx_display) = network_data.total_rx_display {
                                 app.converted_data.total_rx_display = total_rx_display;
                             }

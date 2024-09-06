@@ -13,20 +13,26 @@ impl Painter {
     ) {
         let divided_loc = Layout::default()
             .direction(Direction::Horizontal)
-            .constraints([Constraint::Percentage(50), Constraint::Percentage(50)])
+            .constraints([Constraint::Percentage(30), Constraint::Percentage(30), Constraint::Percentage(40)])
             .split(draw_loc);
 
         let net_loc = Layout::default()
             .direction(Direction::Horizontal)
             .constraints([Constraint::Percentage(100)])
-            .horizontal_margin(1)
+            .horizontal_margin(4)
             .split(divided_loc[0]);
+
+        let net_loc_pkts = Layout::default()
+            .direction(Direction::Horizontal)
+            .constraints([Constraint::Percentage(100)])
+            .horizontal_margin(4)
+            .split(divided_loc[1]);
 
         let total_loc = Layout::default()
             .direction(Direction::Horizontal)
             .constraints([Constraint::Percentage(100)])
             .horizontal_margin(1)
-            .split(divided_loc[1]);
+            .split(divided_loc[2]);
 
         if app_state.current_widget.widget_id == widget_id {
             f.render_widget(
@@ -41,10 +47,17 @@ impl Painter {
         let tx_label = format!("TX: {}", app_state.converted_data.tx_display);
         let total_rx_label = format!("Total RX: {}", app_state.converted_data.total_rx_display);
         let total_tx_label = format!("Total TX: {}", app_state.converted_data.total_tx_display);
+        let rx_label_pkts = format!("RX: {}", app_state.converted_data.rx_display_pkts);
+        let tx_label_pkts = format!("TX: {}", app_state.converted_data.tx_display_pkts);
 
         let net_text = vec![
             Line::from(Span::styled(rx_label, self.colours.rx_style)),
             Line::from(Span::styled(tx_label, self.colours.tx_style)),
+        ];
+
+        let net_text_pkts = vec![
+            Line::from(Span::styled(rx_label_pkts, self.colours.rx_style)),
+            Line::from(Span::styled(tx_label_pkts, self.colours.tx_style)),
         ];
 
         let total_net_text = vec![
@@ -53,6 +66,7 @@ impl Painter {
         ];
 
         f.render_widget(Paragraph::new(net_text).block(Block::default()), net_loc[0]);
+        f.render_widget(Paragraph::new(net_text_pkts).block(Block::default()), net_loc_pkts[0]);
 
         f.render_widget(
             Paragraph::new(total_net_text).block(Block::default()),

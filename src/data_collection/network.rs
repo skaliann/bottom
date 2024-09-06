@@ -10,11 +10,18 @@ pub struct NetworkHarvest {
     pub tx: u64,
     pub total_rx: u64,
     pub total_tx: u64,
+    pub rx_pkts: u64,
+    pub tx_pkts: u64,
+    pub total_rx_pkts: u64,
+    pub total_tx_pkts: u64,
+
 }
 
 impl NetworkHarvest {
     pub fn first_run_cleanup(&mut self) {
         self.rx = 0;
         self.tx = 0;
+        self.rx_pkts = 0;
+        self.tx_pkts = 0;
     }
 }
